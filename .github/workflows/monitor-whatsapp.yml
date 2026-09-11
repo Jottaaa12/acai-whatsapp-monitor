@@ -1,0 +1,26 @@
+name: Monitor WhatsApp
+
+on:
+  schedule:
+    - cron: "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: acai-whatsapp-production
+  cancel-in-progress: false
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verificar servidor, fila e conexao
+        env:
+          MONITOR_SECRET: ${{ secrets.WHATSAPP_MONITOR_SECRET }}
+        run: |
+          test -n "$MONITOR_SECRET"
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 \
+            --max-time 35 \
+            -H "Authorization: Bearer $MONITOR_SECRET" \
+            https://www.sabordaterrabitu.com.br/api/cron/whatsapp-health
